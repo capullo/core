@@ -34,11 +34,12 @@ async def test_full_user_flow_implementation(
         result["flow_id"], user_input={CONF_HOST: "192.168.1.123"}
     )
 
-    assert result.get("title") == "192.168.1.123"
+    assert result.get("title") == "WLED RGB Light"
     assert result.get("type") == RESULT_TYPE_CREATE_ENTRY
     assert "data" in result
     assert result["data"][CONF_HOST] == "192.168.1.123"
-    assert result["data"][CONF_MAC] == "aabbccddeeff"
+    assert "result" in result
+    assert result["result"].unique_id == "aabbccddeeff"
 
 
 async def test_full_zeroconf_flow_implementation(
@@ -61,26 +62,22 @@ async def test_full_zeroconf_flow_implementation(
     flows = hass.config_entries.flow.async_progress()
     assert len(flows) == 1
 
-    assert result.get("description_placeholders") == {CONF_NAME: "example"}
+    assert result.get("description_placeholders") == {CONF_NAME: "WLED RGB Light"}
     assert result.get("step_id") == "zeroconf_confirm"
     assert result.get("type") == RESULT_TYPE_FORM
     assert "flow_id" in result
-
-    flow = flows[0]
-    assert "context" in flow
-    assert flow["context"][CONF_HOST] == "192.168.1.123"
-    assert flow["context"][CONF_NAME] == "example"
 
     result2 = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={}
     )
 
-    assert result2.get("title") == "example"
+    assert result2.get("title") == "WLED RGB Light"
     assert result2.get("type") == RESULT_TYPE_CREATE_ENTRY
 
     assert "data" in result2
     assert result2["data"][CONF_HOST] == "192.168.1.123"
-    assert result2["data"][CONF_MAC] == "aabbccddeeff"
+    assert "result" in result2
+    assert result2["result"].unique_id == "aabbccddeeff"
 
 
 async def test_connection_error(
